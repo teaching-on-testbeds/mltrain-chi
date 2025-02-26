@@ -53,7 +53,7 @@ Then,
   * the start and end time of the time you will try to reserve. (Note that if you mouse over an existing reservation, a pop up will show you the exact start and end time of that reservation.)
   * and the name of the node you want to reserve. (We will reserve nodes by name, not by type, to avoid getting a 1-GPU node when we wanted a 2-GPU node.)
 * Then, on the left side, click on "Reservations" > "Leases", and then click on "Create Lease":
-  * set the "Name" to <code>mltrain_<b>netID</b></code> where in place of <code><b>netID</b></code> you substitute your actual net ID.
+  * set the "Name" to <code>mltrain_<b>netID</b>_<b>X</b></code> where in place of <code><b>netID</b></code> you substitute your actual net ID, and in place of <code><b>X</b></code>, substitute an incrementing number (to differentiate multiple leases for different sections).
   * set the start date and time in UTC. To make scheduling smoother, please start your lease on an even hour boundary, e.g. `XX:00` where `XX` is an even number.
   * modify the lease length (in days) until the end date is correct. Then, set the end time. To be mindful of other users, you should limit your lease time to three hours as directed. Also, to avoid a potential race condition that occurs when one lease starts immediately after another lease ends, you should end your lease five minutes before the end of an hour, e.g. at `YY:55`.
   * Click "Next".
