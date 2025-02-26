@@ -3,7 +3,7 @@ In this tutorial, we explore some of the infrastructure and platform requirement
 * experiment tracking (using [MLFlow](https://mlflow.org/))
 * and scheduling training jobs on a GPU cluster (using [Ray](https://www.ray.io/))
 
-Follow along at [Model training infrastructure and platforms](https://teaching-on-testbeds.github.io/mltrain-chi/).
+Follow along at [Train ML models with MLFlow and Ray](https://teaching-on-testbeds.github.io/mltrain-chi/).
 
 Note: this tutorial requires advance reservation of specific hardware! You will need a node with 2 GPUs suitable for model training. You should reserve a 3-hour block for the MLFlow section and a 3-hour block for the Ray section. (They are designed to run independently.)
 
