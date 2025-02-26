@@ -1,15 +1,17 @@
 
 
+
 ::: {.cell .markdown}
 
 Before you begin, open this experiment on Trovi:
 
-* Use this link: [Model training infrastructure and platforms](https://chameleoncloud.org/experiment/share/) on Trovi
+* Use this link: [Train ML models with MLFlow and Ray](https://chameleoncloud.org/experiment/share/d48d7684-cf6d-4c33-bcd6-5504266bc3d4) on Trovi
 * Then, click “Launch on Chameleon”. This will start a new Jupyter server for you, with the experiment materials already in it.
 
-You will see several notebooks inside the `mltrain-chi` directory - look for the one titled `1_create_server_nvidia.ipynb`. Open this notebook and continue there.
+You will see several notebooks inside the `mltrain-chi` directory - look for the one titled `1_create_server_amd.ipynb`. Open this notebook and continue there.
 
 :::
+
 
 ::: {.cell .markdown}
 
@@ -196,10 +198,10 @@ s.execute("sudo apt -y install nvtop")
 
 ::: {.cell .markdown}
 
-###  Build a container image
+###  Build a container image - for MLFlow section
 
 
-Finally, we will build a container image in which to work, that has:
+Finally, we will build a container image in which to work in the MLFlow section, that has:
 
 * a Jupyter notebook server
 * Pytorch and Pytorch Lightning

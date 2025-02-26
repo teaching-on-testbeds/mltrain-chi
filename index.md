@@ -1,6 +1,6 @@
 
 
-# Model training infrastructure and platforms
+# Train ML models with MLFlow and Ray
 
 In this tutorial, we explore some of the infrastructure and platform requirements for large model training, and to support the training of many models by many teams. We focus specifically on 
 
@@ -90,8 +90,8 @@ Before you begin, open this experiment on Trovi:
 
 The next step will be to provision the bare metal server you have reserved, and configure it to run the containers associated with our experiment. The specific details will depend on what type of GPU server you have reserved - 
 
-* If you have reserved an AMD GPU server, work through the notebook `1_create_server_amd.ipynb`. Or if you don't have access to the Chameleon Jupyter environment or prefer to work through it by hand, you can follow [these instructions to provision and configure the AMD server](snippets/create_server_amd.html).
-* If you have reserved an NVIDIA GPU server, work through the notebook `1_create_server_nvidia.ipynb`. Or if you don't have access to the Chameleon Jupyter environment or prefer to work through it by hand, you can follow [these instructions to provision and configure the NVIDIA server](snippets/create_server_nvidia.html).
+* If you have reserved an AMD GPU server, work through the notebook `1_create_server_amd.ipynb` inside the Chameleon Jupyter environment. Or if you don't have access to the Chameleon Jupyter environment or prefer to work through it by hand, you can follow [these instructions to provision and configure the AMD server](snippets/create_server_amd.html).
+* If you have reserved an NVIDIA GPU server, work through the notebook `1_create_server_nvidia.ipynb`  inside the Chameleon Jupyter environment. Or if you don't have access to the Chameleon Jupyter environment or prefer to work through it by hand, you can follow [these instructions to provision and configure the NVIDIA server](snippets/create_server_nvidia.html).
 
 After you have finished setting up the server, you will return to this page for the next section.
 
@@ -1190,6 +1190,8 @@ To bring up the cluster, follow the instructions for the GPU type that you are u
 
 ### Start the Ray cluster - AMD GPUs
 
+> **Note**: Follow these instructions only if you are running this experiment on a node with AMD GPUs.
+
 First, we're going to build a container image for the Ray worker nodes, with Ray and ROCm installed. Run
 
 ```bash
@@ -1216,7 +1218,7 @@ docker ps
 
 should show that the `ray-head`, `ray-worker-0`, and `ray-worker-1` containers are running.
 
-Verify that the GPUs are visible to the worker nodes.
+Verify that a GPU is visible to each of the worker nodes.
 
 ```bash
 # run on node-mltrain
@@ -1230,12 +1232,12 @@ and
 docker exec ray-worker-1 "rocm-smi"
 ```
 
-Although both GPUs appear in the output of `rocm-smi`, we have set `HIP_VISIBLE_DEVICES` and `ROCR_VISIBLE_DEVICES` environment variables in each container to tell it which GPU it is permitted to use. Therefore, each container should use only one of the GPUs.
-
 
 
 
 ### Start the Ray cluster - NVIDIA GPUs
+
+> **Note**: Follow these instructions only if you are running this experiment on a node with NVIDIA GPUs.
 
 We'll bring up our Ray cluster with Docker Compose. Run:
 
@@ -1274,7 +1276,7 @@ and confirm that only one GPU appears in the output, and it is a different GPU (
 
 
 
-Next, let's start a Jupyter notebook server that does *not* have any GPUs attached. We'll use this server to submit jobs to the Ray cluster.
+Next, let's start a Jupyter notebook container that does *not* have any GPUs attached. We'll use this container to submit jobs to the Ray cluster.
 
 
 ```bash
@@ -1286,14 +1288,14 @@ Run
 
 ```bash
 # run on node-mltrain
+HOST_IP=$(curl --silent http://169.254.169.254/latest/meta-data/public-ipv4 )
 docker run  -d --rm  -p 8888:8888 \
     -v ~/mltrain-chi/workspace_ray:/home/jovyan/work/ \
-    -e RAY_ADDRESS=http://A.B.C.D:8265/ \
+    -e RAY_ADDRESS=http://${HOST_IP}:8265/ \
     --name jupyter \
     jupyter-ray
 ```
 
-where in place of `A.B.C.D`, substitute the floating IP assigned to your instance. 
 
 Then, run 
 
@@ -1342,10 +1344,9 @@ Click on the "Cluster" tab and verify that you see your head node and two worker
 
 Now that we have a Ray cluster running, we can learn how to use it! After you finish this section, 
 
-* you should understand how to identify the resource requirements and runtime environment for a job, and submit it to Ray
+* you should understand how to specify the resource requirements and runtime environment for a job, and submit it to Ray
 * and you should be able to modify a Pytorch Lightning script to use Ray Train, including its checkpointing, fault tolerance, and distributed training capabilities, and to use Ray Tune for hyperparameter optimization.
 
-The estimated time required to run the training jobs on this page is about 1.5 hours.
 
 
 
@@ -1354,9 +1355,23 @@ The estimated time required to run the training jobs on this page is about 1.5 h
 
 To start, let's see how we can submit a training job to our Ray cluster, without modifying the code of our training job at all.
 
-In the Jupyter workspace, the `gourmetgram-train/train.py` script is the GourmetGram food image classifier training script for Pytorch Lightning, which we've seen before. 
+The premise of this example is as follows: You are working at a machine learning engineer at a small startup company called GourmetGram. They are developing an online photo sharing community focused on food. You have developed a convolutional neural network in Pytorch that automatically classifies photos of food into one of a set of categories: Bread, Dairy product, Dessert, Egg, Fried food, Meat, Noodles/Pasta, Rice, Seafood, Soup, and Vegetable/Fruit. 
 
-To run it on a worker node, though, we must give Ray some instructions about how to set up the runtime environment on the worker nodes:
+An original Pytorch Lightning training script is available at: [gourmetgram-train/train.py](https://github.com/teaching-on-testbeds/gourmetgram-train/blob/lightning/train.py). The model uses a MobileNetV2 base layer, adds a classification head on top, trains the classification head, and then fine-tunes the entire model, using the [Food-11 dataset](https://www.epfl.ch/labs/mmspg/downloads/food-image-datasets/).
+
+
+Open a terminal inside this Jupyter environment ("File > New > New Terminal") and `cd` to the `work` directory. Then, clone the `lightning` branch of the [gourmetgram-train](https://github.com/teaching-on-testbeds/gourmetgram-train/) repository:
+
+```bash
+# run in a terminal inside jupyter container
+cd ~/work
+git clone https://github.com/teaching-on-testbeds/gourmetgram-train -b lightning
+```
+
+In the `gourmetgram-train` directory, open `train.py`, and view it directly there.
+
+
+To run it on a worker node, though, we must give Ray some instructions about how to set up the runtime environment on the worker nodes. Two files necessary for this, `requirements.txt` and `runtime.json`, are inside the "work" directory:
 
 * We assume that the worker nodes already have the Food-11 dataset at `/mnt/Food-11`, since we attached our data volume to those containers. So we don't have to worry about getting the data to the worker node in this case. We will have to make sure that the environment variable `FOOD11_DATA_DIR` is set, so that the training script can find the data. (In general, we will need to make sure that either worker nodes have access to the data, or they download it at the beginning of the training job.)
 * We need to make sure that the worker nodes have the Python packages necessary to run our script. We'll put the list of packages in `requirements.txt`.
@@ -1397,11 +1412,11 @@ While it is running, click on the "Overview", "Cluster", and "Jobs" tabs in the 
 
 * Initially, the job will be a in PENDING state, as the runtime environment is set up. This is slow the first time (because of downloading the Python packages), but faster in subsequent runs because the packages are cached on the workers.
 * Then, the job will be in RUNNING state. Eventually, it should go to SUCCEEDED.
-* You will see the job's GPU and CPU usage in the "Resource Status" section of the "Overview" page, which shows the cumulative resource usage of all jobs on the cluster.
-* As the job runs, if you are using NVIDIA GPUs you'll see one of the worker nodes has higher GPU utilization, in the "Cluster" tab. (Ray does not support AMD GPUs for this visualization, so if a node has an AMD GPU it will show "NA" in this field, even though the GPU is used by the worker to execute jobs.)
+* You will see the job's requested GPU and CPU resource in the "Resource Status" section of the "Overview" page, which shows the cumulative resource requests of all jobs running on the cluster.
+* As the job runs, if you are using NVIDIA GPUs you'll see one of the worker nodes has higher GPU utilization, in the "Cluster" tab. (Ray does not support this visualization for AMD GPUs, so if a node has an AMD GPU it will show "NA" in this field, even though the GPU is used by the worker to execute jobs.)
 * You can click on the job and, in the "Logs", see the output of the job.
 
-Let the training job finish, and get to SUCCEEDED state.
+Let the training job finish, and get to SUCCEEDED state. (This may take up to 10-15 minutes.)
 
 
 
@@ -1419,7 +1434,7 @@ noting that we have no node with 2 GPUs - only two nodes, each with 1 GPU.
 
 In the Ray dashboard "Overview" page, observe that this request is listed in "Demands" in the "Resource Status" section.
 
-This job will be stuck in PENDING state until we add a node with 2 GPUs to the cluster, at which time it can be scheduled.
+The job will be stuck in PENDING state until we add a node with 2 GPUs to the cluster, at which time it can be scheduled.
 
 In a commercial cloud, when deployed with Kubernetes, a Ray cluster could [autoscale](https://docs.ray.io/en/latest/cluster/vms/user-guides/configuring-autoscaling.html) in this situation to accommodate the demand that could not be satisfied. Our cluster is not auto-scaling and we are not going to add a node with 2 GPUs, so this job will wait forever.
 
@@ -1517,7 +1532,7 @@ scaling_config = ScalingConfig(num_workers=1, use_gpu=True, resources_per_worker
 to 
 
 ```python
-scaling_config = ScalingConfig(num_workers=1, use_gpu=True, resources_per_worker={"GPU": 1, "CPU": 8})
+scaling_config = ScalingConfig(num_workers=2, use_gpu=True, resources_per_worker={"GPU": 1, "CPU": 8})
 ``` 
 
 to scale to two worker nodes, each with 1 GPU and 8 GPUs assigned to the job. Save it, and run with
@@ -1526,6 +1541,8 @@ to scale to two worker nodes, each with 1 GPU and 8 GPUs assigned to the job. Sa
 # runs on jupyter container inside node-mltrain, from inside the "work" directory
 ray job submit --runtime-env runtime.json  --working-dir .  -- python gourmetgram-train/train.py 
 ```
+
+On the Ray dashboard, in the "Resource Status" section of the "Overview" tab, you should see the increased resource requirements reflected in the "Usage" section.
 
 In a terminal on the "node-mltrain" host (*not* inside the Jupyter container), run
 
@@ -1560,15 +1577,21 @@ scaling_config = ScalingConfig(num_workers=1, use_gpu=True, resources_per_worker
 i.e. set the number of workers back to 1, and reduce the resources per worker. 
 
 
-Then, open *three* terminals inside the Jupyter container, and in each, run
+Then, open *three* terminals inside the Jupyter container. You are going to start three training jobs at the same time.
+
+In each of the terminals, run
 
 
 ```bash
 # runs on jupyter container inside node-mltrain, from inside the "work" directory
+cd ~/work
 ray job submit --runtime-env runtime.json  --working-dir .  -- python gourmetgram-train/train.py 
 ```
 
 to submit the job three times.
+
+On the Ray dashboard, in the "Resource Status" section of the "Overview" tab, you should see the total resource requirements reflected in the "Usage" section.
+
 
 In a terminal on the "node-mltrain" host (not inside the container), run
 
@@ -1579,7 +1602,9 @@ nvtop
 
 to observe the effect on GPU utilization. You should be able to visually identify the GPU that has two jobs running on it, vs. the GPU that has only one. 
 
-Wait for the training jobs to finish, and note the total time required to run 3 training jobs. (This is the time from "start of first job" until "end of last job to finish".) Fractional GPU use allows us to increase the throughput of the cluster - it won't reduce the time to complete any one job, but if GPUs are underutilized, it can increase the number of jobs completed per unit time.
+Wait for the training jobs to finish, and note the total time required to run 3 training jobs. (This is the time from "start of first job" until "end of last job to finish".) Since these jobs originally did not utilize a full GPU, they aren't slowed down much by sharing a GPU. 
+
+Fractional GPU use allows us to increase the throughput of the cluster - it won't reduce the time to complete any one job, but if GPUs are underutilized, it can increase the number of jobs completed per unit time.
 
 
 
@@ -1605,7 +1630,7 @@ ray job submit --runtime-env runtime.json  --working-dir .  -- python gourmetgra
 
 to submit the job.
 
-Wait until a few epochs have passed, so that there is a checkpoint to resume from.
+Wait until about half of the epochs have passed (e.g. about 10 epochs), so that there is a checkpoint to resume from.
 
 In a terminal on the "node-mltrain" host (not inside the container), run
 
@@ -1624,7 +1649,9 @@ In that second terminal bring down the Docker container in which you Ray Train j
 # docker stop ray-worker-1
 ```
 
-Observe in the `nvtop` output that the job is transferred to the other GPU.  And, in the `ray job submit` output, you will see something like
+Observe in the `nvtop` output that the job is transferred to the other GPU. (Take a screenshot for your reference, during the interval when GPU usage is visible on both GPUs, showing the job transfer.) 
+
+And, in the `ray job submit` output, you will see something like
 
 ```
 (TorchTrainer pid=516, ip=172.19.0.4) Worker 0 has failed.
@@ -1649,7 +1676,7 @@ Re-start the worker you stopped with one of -
 
 
 
-### Use Ray Tune for hyperparameter optimization
+### Optional: Use Ray Tune for hyperparameter optimization
 
 Finally, let's try using Ray Tune! Ray Tune makes it easy to run a distributed hyperparamter optimization, with intelligent scheduling e.g. aborting runs that are not looking promising. 
 

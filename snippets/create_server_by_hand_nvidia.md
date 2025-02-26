@@ -1,5 +1,8 @@
+If you have access to Trovi on Chameleon, you can open this experiment there:
 
-::: {.cell .markdown}
+* Use this link: [Train ML models with MLFlow and Ray](https://chameleoncloud.org/experiment/share/d48d7684-cf6d-4c33-bcd6-5504266bc3d4) on Trovi
+* Then, click “Launch on Chameleon”. 
+
 
 ## Launch and set up NVIDIA A100 40GB server - by hand
 
@@ -7,11 +10,6 @@
 
 At the beginning of the lease time, we will bring up our GPU server. We will use Horizon GUI at CHI@TACC to provision our server. 
 
-
-:::
-
-
-::: {.cell .markdown}
 
 To access this interface,
 
@@ -42,9 +40,6 @@ Note: security groups are not used at Chameleon bare metal sites, so we do not h
 
 You will see your instance appear in the list of compute instances. Within 10-20 minutes, it should go to the "Running" state. 
 
-:::
-
-::: {.cell .markdown}
 
 Then, we'll associate a floating IP with the instance, so that we can access it over SSH.
 
@@ -71,11 +66,6 @@ where
 
 You will run the rest of the commands in this section inside your SSH session on "node-mltrain".
 
-:::
-
-
-
-::: {.cell .markdown}
 
 ## Retrieve code and notebooks on the instance
 
@@ -85,12 +75,6 @@ We'll start by retrieving the code and other materials on the instance.
 # run on node-mltrain
 git clone --recurse-submodules https://github.com/teaching-on-testbeds/mltrain-chi
 ```
-
-:::
-
-
-::: {.cell .markdown}
-
 
 ## Set up Docker
 
@@ -109,11 +93,6 @@ sudo groupadd -f docker; sudo usermod -aG docker $USER
 ```
 
 After running this command, for the change in permissions to be effective, you must open a new SSH session - use `exit` and then reconnect. When you do, the output of `id` should show that you are a member of the `docker` group..
-
-:::
-
-
-::: {.cell .markdown}
 
 ## Set up the NVIDIA container toolkit
 
@@ -143,16 +122,10 @@ sudo apt update
 sudo apt -y install nvtop
 ```
 
+###  Build a container image - for MLFlow section
 
 
-:::
-
-::: {.cell .markdown}
-
-###  Build a container image
-
-
-Finally, we will build a container image in which to work, that has:
+Finally, we will build a container image in which to work in the MLFlow section, that has:
 
 * a Jupyter notebook server
 * Pytorch and Pytorch Lightning
@@ -172,4 +145,3 @@ docker build -t jupyter-mlflow -f mltrain-chi/docker/Dockerfile.jupyter-torch-ml
 In the meantime, open another SSH session on "node-mltrain", so that you can continue with the next section.
 
 
-:::
