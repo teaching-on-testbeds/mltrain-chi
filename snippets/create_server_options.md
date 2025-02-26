@@ -4,7 +4,7 @@
 
 Before you begin, open this experiment on Trovi:
 
-* Use this link: [Model training infrastructure and platforms](https://chameleoncloud.org/experiment/share/) on Trovi
+* Use this link: [Train ML models with MLFlow and Ray](https://chameleoncloud.org/experiment/share/d48d7684-cf6d-4c33-bcd6-5504266bc3d4) on Trovi
 * Then, click “Launch on Chameleon”. This will start a new Jupyter server for you, with the experiment materials already in it.
 
 :::

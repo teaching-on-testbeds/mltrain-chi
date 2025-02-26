@@ -81,7 +81,7 @@ At the beginning of your lease time, you will continue with the next step, in wh
 
 Before you begin, open this experiment on Trovi:
 
-* Use this link: [Model training infrastructure and platforms](https://chameleoncloud.org/experiment/share/) on Trovi
+* Use this link: [Train ML models with MLFlow and Ray](https://chameleoncloud.org/experiment/share/d48d7684-cf6d-4c33-bcd6-5504266bc3d4) on Trovi
 * Then, click “Launch on Chameleon”. This will start a new Jupyter server for you, with the experiment materials already in it.
 
 
@@ -1201,6 +1201,9 @@ docker build -t ray-rocm:2.42.1 -f mltrain-chi/docker/Dockerfile.ray-rocm .
 
 It will take 5-10 minutes to build the container image.
 
+You can see this Dockerfile here: [Dockerfile.ray-rocm](https://github.com/teaching-on-testbeds/mltrain-chi/blob/main/docker/Dockerfile.ray-rocm).
+
+
 We'll bring up our Ray cluster with Docker Compose. Run:
 
 ```bash
@@ -1208,6 +1211,9 @@ We'll bring up our Ray cluster with Docker Compose. Run:
 export HOST_IP=$(curl --silent http://169.254.169.254/latest/meta-data/public-ipv4 )
 docker compose -f mltrain-chi/docker/docker-compose-ray-rocm.yaml up -d
 ```
+
+You can see this Docker Compose YAML here: [docker-compose-ray-rocm.yaml](https://github.com/teaching-on-testbeds/mltrain-chi/blob/main/docker/docker-compose-ray-rocm.yaml).
+
 
 When it is finished, the output of 
 
@@ -1246,6 +1252,8 @@ We'll bring up our Ray cluster with Docker Compose. Run:
 export HOST_IP=$(curl --silent http://169.254.169.254/latest/meta-data/public-ipv4 )
 docker compose -f mltrain-chi/docker/docker-compose-ray-cuda.yaml up -d
 ```
+
+You can see this Docker Compose YAML here: [docker-compose-ray-cuda.yaml](https://github.com/teaching-on-testbeds/mltrain-chi/blob/main/docker/docker-compose-ray-cuda.yaml).
 
 When it is finished, the output of 
 
