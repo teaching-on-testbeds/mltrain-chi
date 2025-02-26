@@ -16,20 +16,20 @@ To run this experiment, you should have already created an account on Chameleon,
 
 ## Experiment resources 
 
-For this experiment, we will provision one bare-metal node with two GPUs. 
+For this experiment, we will provision one bare-metal node with GPUs. 
 
-We can browse Chameleon hardware configurations for suitable node types using the [Hardware Browser](https://chameleoncloud.org/hardware/). 
+The MLFlow section is more interesting if we run it on a node with two GPUs, because then we can better understand how to configure logging in a distributed training run. But, if need be, we can run it on a node with one GPU.
 
-For example, to find nodes with 2x GPUs: if we expand "Advanced Filters", check the "2" box under "GPU count", and then click "View", we can identify some suitable node types. 
+The Ray section requires a node with two GPUs.
 
-We'll proceed with the `gpu_mi100` and `compute_liqid` node types at CHI@TACC
+We can browse Chameleon hardware configurations for suitable node types using the [Hardware Browser](https://chameleoncloud.org/hardware/). For example, to find nodes with 2x GPUs: if we expand "Advanced Filters", check the "2" box under "GPU count", and then click "View", we can identify some suitable node types. 
 
-* Most of the `gpu_mi100` nodes have two AMD MI100 GPUs. (One of the `gpu_mi100` nodes, `c03-04` has only one GPU; we'll avoid this one.)
-* The `compute_liqid` nodes at CHI@TACC have one or two NVIDIA A100 40GB GPUs. As of this writing, `liqid01` and `liqid02` have two GPUs, so we may use these two. 
+We'll proceed with the `gpu_mi100` and `compute_liqid` node types at CHI@TACC.
 
-(Some parts of the experiment require only one GPU; you can do the MLFlow section on a node with one GPU, but then you won't get to see how to log from only the "primary" process in a distributed training job. You can do the MLFlow section on a `gpu_mi100` or `compute_liqid` with only one GPU, subject to that limitation.)
+* Most of the `gpu_mi100` nodes have two AMD MI100 GPUs. (One of the `gpu_mi100` nodes, `c03-04` has only one GPU; we'll avoid this one for the "Ray" section, which requires two GPUs.)
+* The `compute_liqid` nodes at CHI@TACC have one or two NVIDIA A100 40GB GPUs. As of this writing, `liqid01` and `liqid02` have two GPUs, so we may use these two for the "Ray" section, which requires two GPUs. 
 
-You can decide which type to use based on availability; but once you decide, make sure to follow the instructions specific to that GPU type.
+You can decide which type to use based on availability; but once you decide, make sure to follow the instructions specific to that GPU type. In some parts, there will be different instructions for setting up an AMD GPU node vs. and NVIDIA GPU node.
 
 
 :::
@@ -86,7 +86,7 @@ Since you will need the full lease time to actually execute your experiment, you
 
 At the beginning of your lease time, you will continue with the next step, in which you bring up and configure a bare metal instance! Two alternate sets of instructions are provided for this part:
 
-* a notebook that runs in the Chameleon Jupyter interface. This automates the setup process, so that you can "Run > Run All
+* a notebook that runs in the Chameleon Jupyter interface. This automates the setup process, so that you can "Run > Run Selected Cell and All Below" to let the setup mostly run without human intervention.
 * or, instructions for using the Horizon GUI and an SSH session, in case you cannot or prefer not to use the Chameleon Jupyter interface
 
 :::
