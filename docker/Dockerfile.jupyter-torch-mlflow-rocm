@@ -26,6 +26,6 @@ RUN pip install --pre --no-cache-dir  --index-url https://download.pytorch.org/w
 
 # Install MLFlow and pyrsmi library used by MLFlow for monitoring AMD GPU
 RUN pip install --pre --no-cache-dir pyrsmi && \
-    pip install --pre --no-cache-dir git+https://github.com/mlflow/mlflow.git@refs/pull/12694/merge && \
+    pip install --pre --no-cache-dir git+https://github.com/mlflow/mlflow.git && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
