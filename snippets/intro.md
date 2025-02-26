@@ -86,7 +86,7 @@ Since you will need the full lease time to actually execute your experiment, you
 
 At the beginning of your lease time, you will continue with the next step, in which you bring up and configure a bare metal instance! Two alternate sets of instructions are provided for this part:
 
-* a notebook that runs in the Chameleon Jupyter interface. This automates the setup process, so that you can "Run > 
+* a notebook that runs in the Chameleon Jupyter interface. This automates the setup process, so that you can "Run > Run All
 * or, instructions for using the Horizon GUI and an SSH session, in case you cannot or prefer not to use the Chameleon Jupyter interface
 
 :::
