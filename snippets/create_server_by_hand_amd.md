@@ -1,11 +1,4 @@
 
-
-If you have access to Trovi on Chameleon, you can open this experiment there:
-
-* Use this link: [Train ML models with MLFlow and Ray](https://chameleoncloud.org/experiment/share/d48d7684-cf6d-4c33-bcd6-5504266bc3d4) on Trovi
-* Then, click “Launch on Chameleon”. 
-
-
 ## Launch and set up AMD MI100 server - by hand
 
 > **Note**: if you set up your AMD MI100 server using the `python-chi` notebook, you will skip this section! This section describes how to set up the server "by hand", in case you do not have access to the Chameleon Jupyter environment in which to run the `python-chi` notebook, or in case you prefer to do it "by hand".

@@ -2,17 +2,6 @@
 
 ::: {.cell .markdown}
 
-Before you begin, open this experiment on Trovi:
-
-* Use this link: [Train ML models with MLFlow and Ray](https://chameleoncloud.org/experiment/share/d48d7684-cf6d-4c33-bcd6-5504266bc3d4) on Trovi
-* Then, click “Launch on Chameleon”. This will start a new Jupyter server for you, with the experiment materials already in it.
-
-You will see several notebooks inside the `mltrain-chi` directory - look for the one titled `1_create_server_amd.ipynb`. Open this notebook and continue there.
-
-:::
-
-::: {.cell .markdown}
-
 ## Launch and set up AMD MI100 server - with python-chi
 
 At the beginning of the lease time, we will bring up our GPU server. We will use the `python-chi` Python API to Chameleon to provision our server. 
