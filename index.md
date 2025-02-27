@@ -1192,6 +1192,15 @@ To bring up the cluster, follow the instructions for the GPU type that you are u
 
 > **Note**: Follow these instructions only if you are running this experiment on a node with AMD GPUs.
 
+For the Ray experiment, you must use a node with two GPUs. Run
+
+```bash
+# run on node-mltrain
+rocm-smi
+```
+
+and confirm that you see two GPUs.
+
 First, we're going to build a container image for the Ray worker nodes, with Ray and ROCm installed. Run
 
 ```bash
@@ -1244,6 +1253,16 @@ docker exec ray-worker-1 "rocm-smi"
 ### Start the Ray cluster - NVIDIA GPUs
 
 > **Note**: Follow these instructions only if you are running this experiment on a node with NVIDIA GPUs.
+
+For the Ray experiment, you must use a node with two GPUs. Run
+
+```bash
+# run on node-mltrain
+nvidia-smi
+```
+
+and confirm that you see two GPUs.
+
 
 We'll bring up our Ray cluster with Docker Compose. Run:
 
