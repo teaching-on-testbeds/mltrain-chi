@@ -154,12 +154,14 @@ trainer = Trainer(
     plugins=[ray.train.lightning.RayLightningEnvironment()],
     callbacks=[early_stopping_callback, backbone_finetuning_callback, ray.train.lightning.RayTrainReportCallback()]
 )
+trainer = ray.train.lightning.prepare_trainer(trainer)
+
 ```
 
 * at the end, we run the training function with
 
 ```python
-run_config = RunConfig(storage_path="s3://ray", failure_config=FailureConfig(max_failures=2))
+run_config = RunConfig(storage_path="s3://ray")
 scaling_config = ScalingConfig(num_workers=1, use_gpu=True, resources_per_worker={"GPU": 1, "CPU": 8})
 trainer = TorchTrainer(
     train_func, scaling_config=scaling_config, run_config=run_config, train_loop_config=config
@@ -287,12 +289,46 @@ Fractional GPU use allows us to increase the throughput of the cluster - it won'
 
 Next, let's try out fault tolerance! If the worker node that runs our Ray Train job dies, Ray can resume from the most recent checkpoint on another worker node.
 
-We already configured fault tolerance with
+Fault tolerance is configured in another branch
+
+```bash
+# run in a terminal inside jupyter container
+cd ~/work/gourmetgram-train
+git stash # stash any changes you made to the current branch
+git fetch -a
+git switch fault_tolerance
+cd ~/work
+```
+
+To add fault tolerance, we
+
+* have an additional import
+* add it to our `RunConfig`:
 
 ```python
 run_config = RunConfig( ... failure_config=FailureConfig(max_failures=2))
 ```
 
+* and inside `train_fun`, we replace the old
+
+```python
+trainer.fit(lightning_food11_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
+```
+
+with
+
+```python
+## For Ray Train fault tolerance with FailureConfig
+# Recover from checkpoint, if we are restoring after failure
+checkpoint = train.get_checkpoint()
+if checkpoint:
+    with checkpoint.as_directory() as ckpt_dir:
+        ckpt_path = os.path.join(ckpt_dir, "checkpoint.ckpt")
+        trainer.fit(lightning_food11_model, train_dataloaders=train_loader, val_dataloaders=val_loader, ckpt_path=ckpt_path)
+else:
+        trainer.fit(lightning_food11_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
+
+```
 
 So, let's create a failure to see how it works! Run
 
