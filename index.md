@@ -1303,6 +1303,8 @@ and confirm that only one GPU appears in the output, and it is a different GPU (
 
 
 
+### Start a Jupyter container
+
 Next, let's start a Jupyter notebook container that does *not* have any GPUs attached. We'll use this container to submit jobs to the Ray cluster.
 
 
