@@ -7,7 +7,7 @@
 
 At the beginning of the lease time, we will bring up our GPU server. We will use the `python-chi` Python API to Chameleon to provision our server. 
 
-> **Note**: if you don't have access to the Chameleon Jupyter environment, or if you prefer to set up your AMD MI100 server by hand, the next section provides alternative instructions! If you want to set up your server "by hand", skip to the next section.
+> **Note**: if you don't have access to the Chameleon Jupyter environment, or if you prefer to set up your NVIDIA server by hand, the next section provides alternative instructions! If you want to set up your server "by hand", skip to the next section.
 
 
 We will execute the cells in this notebook inside the Chameleon Jupyter environment.
