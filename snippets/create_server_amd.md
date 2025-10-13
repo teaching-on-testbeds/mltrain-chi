@@ -51,7 +51,7 @@ As the notebook executes, monitor its progress to make sure it does not get stuc
 
 ::: {.cell .markdown}
 
-We will use the lease to bring up a server with the `CC-Ubuntu24.04-hwe` disk image. (The default Ubuntu 24.04 kernel is not compatible with the AMD GPU on these nodes.)
+We will use the lease to bring up a server with the `CC-Ubuntu24.04-ROCm` disk image. (The default Ubuntu 24.04 kernel is not compatible with the AMD GPU on these nodes.)
 
 > **Note**: the following cell brings up a server only if you don't already have one with the same name! (Regardless of its error state.) If you have a server in ERROR state already, delete it first in the Horizon GUI before you run this cell.
 
@@ -65,7 +65,7 @@ username = os.getenv('USER') # all exp resources will have this prefix
 s = server.Server(
     f"node-mltrain-{username}", 
     reservation_id=l.node_reservations[0]["id"],
-    image_name="CC-Ubuntu24.04-hwe"
+    image_name="CC-Ubuntu24.04-ROCm"
 )
 s.submit(idempotent=True)
 ```
@@ -155,8 +155,8 @@ Let's follow [AMD's instructions for setting up `amdgpu-install`](https://rocm.d
 
 ::: {.cell .code}
 ```python
-s.execute("sudo apt update; wget https://repo.radeon.com/amdgpu-install/6.3.3/ubuntu/noble/amdgpu-install_6.3.60303-1_all.deb")
-s.execute("sudo apt -y install ./amdgpu-install_6.3.60303-1_all.deb; sudo apt update")
+s.execute("sudo apt update; wget https://repo.radeon.com/amdgpu-install/6.4/ubuntu/noble/amdgpu-install_6.4.60400-1_all.deb")
+s.execute("sudo apt -y install ./amdgpu-install_6.4.60400-1_all.deb; sudo apt update")
 ```
 :::
 

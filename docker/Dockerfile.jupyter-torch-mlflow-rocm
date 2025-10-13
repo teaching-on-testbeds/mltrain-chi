@@ -1,7 +1,7 @@
 FROM quay.io/jupyter/scipy-notebook
 
-ARG ROCM_VERSION=6.3
-ARG AMDGPU_VERSION=6.3.60300
+ARG ROCM_VERSION=6.4
+ARG AMDGPU_VERSION=6.4.60400
 
 USER root
 RUN wget https://repo.radeon.com/amdgpu-install/$ROCM_VERSION/ubuntu/noble/amdgpu-install_$AMDGPU_VERSION-1_all.deb &&  \
@@ -16,7 +16,7 @@ USER ${NB_UID}
 ENV PATH="/opt/venv/bin:$PATH:/opt/rocm/bin/" 
 
 # Install PyTorch with ROCm compatibility, and Lightning
-RUN pip install --pre --no-cache-dir  --index-url https://download.pytorch.org/whl/nightly/rocm6.3/ \
+RUN pip install --pre --no-cache-dir  --index-url https://download.pytorch.org/whl/nightly/rocm6.4/ \
     'torch' \
     'torchaudio' \
     'torchvision' && \

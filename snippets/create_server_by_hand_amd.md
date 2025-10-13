@@ -22,7 +22,7 @@ You will be prompted to set up your instance step by step using a graphical "wiz
 * On the first ("Details") tab, set the instance name to  <code>node-mltrain-<b>netID</b></code> where in place of <code><b>netID</b></code> you substitute your own net ID (e.g. `ff524` in my case). 
 * From the "Reservation" drop-down menu, select your reservation.
 * Leave other settings at their default values, and click "Next".
-* In the second ("Source") tab, we specify the source disk from which the instance should boot. In the "Select Boot Source" menu, choose "Image". Then, in the "Available" list at the bottom, search for `CC-Ubuntu24.04-hwe` (the default Ubuntu 24.04 disk image is incompatible with the MI100 GPU - this image has a Hardware Enablement kernel with which the GPU *is* compatible). Click the arrow next to this entry. You will see the `CC-Ubuntu24.04-hwe` image appear in the "Allocated" list. Click "Next".
+* In the second ("Source") tab, we specify the source disk from which the instance should boot. In the "Select Boot Source" menu, choose "Image". Then, in the "Available" list at the bottom, search for `CC-Ubuntu24.04-ROCm` (the default Ubuntu 24.04 disk image is incompatible with the MI100 GPU - this image has a Hardware Enablement kernel with which the GPU *is* compatible). Click the arrow next to this entry. You will see the `CC-Ubuntu24.04-ROCm` image appear in the "Allocated" list. Click "Next".
 * In the third ("Flavor") page, click "Next". (There are no "flavors" when provisioning a bare metal instance.)
 * In the fourth ("Networks") tab, we will attach the instance to a network provided by the infrastructure provider which is connected to the Internet.
   * From the "Available" list, click on the arrow next to `sharednet1`. It will appear as item 1 in the "Allocated" list. 
@@ -100,8 +100,8 @@ Let's follow [AMD's instructions for setting up `amdgpu-install`](https://rocm.d
 ```bash
 # run on node-mltrain
 sudo apt update
-wget https://repo.radeon.com/amdgpu-install/6.3.3/ubuntu/noble/amdgpu-install_6.3.60303-1_all.deb
-sudo apt -y install ./amdgpu-install_6.3.60303-1_all.deb
+wget https://repo.radeon.com/amdgpu-install/6.4/ubuntu/noble/amdgpu-install_6.4.60400-1_all.deb
+sudo apt -y install ./amdgpu-install_6.4.60400-1_all.deb
 sudo apt update
 ```
 
