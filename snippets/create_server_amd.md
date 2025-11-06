@@ -156,7 +156,7 @@ Let's follow [AMD's instructions for setting up `amdgpu-install`](https://rocm.d
 ::: {.cell .code}
 ```python
 s.execute("sudo apt update; wget https://repo.radeon.com/amdgpu-install/6.4/ubuntu/noble/amdgpu-install_6.4.60400-1_all.deb")
-s.execute("sudo apt -y install ./amdgpu-install_6.4.60400-1_all.deb; sudo apt update")
+s.execute("sudo apt -o DPkg::Options::='--force-confnew' -y install ./amdgpu-install_6.4.60400-1_all.deb; sudo apt update")
 ```
 :::
 
