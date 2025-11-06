@@ -9,6 +9,6 @@ RUN pip install --pre --no-cache-dir lightning && \
 
 # Install MLFlow and pynvml library used by MLFlow for monitoring NVIDIA GPU
 RUN pip install --pre --no-cache-dir pynvml && \
-    pip install --pre --no-cache-dir mlflow && \
+    pip install --pre --no-cache-dir mlflow==2.20.2 && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
