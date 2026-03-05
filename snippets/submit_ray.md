@@ -119,7 +119,8 @@ While this is enough to run training jobs on the cluster, we're not making full 
 * distributed training across different workers in the cluster (they can even be on different hosts! Although in this experiment, we're not using different hosts because it makes reservations complicated.)
 * and, together with Ray Tune, intelligent hyperparameter optimization.
 
-It is simple to [wrap a Pytorch Lightning script with Ray Train](https://docs.ray.io/en/latest/train/getting-started-pytorch-lightning.html). Run
+It is simple to [wrap a Pytorch Lightning script with Ray Train](https://docs.ray.io/en/latest/train/getting-started-pytorch-lightning.html). Close `train.py` if it is open, then run
+
 
 ```bash
 # run in a terminal inside jupyter container
@@ -296,7 +297,7 @@ Fractional GPU use allows us to increase the throughput of the cluster - it won'
 
 Next, let's try out fault tolerance! If the worker node that runs our Ray Train job dies, Ray can resume from the most recent checkpoint on another worker node.
 
-Fault tolerance is configured in another branch
+Fault tolerance is configured in another branch. Close `train.py` if it is open, then switch branches with
 
 ```bash
 # run in a terminal inside jupyter container
@@ -357,7 +358,7 @@ nvtop
 
 and identify whether the job is assigned to GPU 0 or GPU 1. Keep monitoring the `nvtop` output as you bring up a second terminal on "node-mltrain".
 
-In that second terminal bring down the Docker container in which you Ray Train job is running (`ray-worker-0` has GPU 0 and `ray-worker-1` has GPU 1) - run one of these two commands -
+In that second terminal bring down the Docker container in which you Ray Train job is running - run one of these two commands -
 
 ```bash
 # runs on node-mltrain
@@ -367,7 +368,9 @@ In that second terminal bring down the Docker container in which you Ray Train j
 
 Observe in the `nvtop` output that the job is transferred to the other GPU. (Take a screenshot for your reference, during the interval when GPU usage is visible on both GPUs, showing the job transfer.) 
 
-And, in the `ray job submit` output, you will see something like
+If you accidentally bring down the wrong GPU (i.e. you bring down the *un-used* one instead of the *used* one), just `docker start` the one you brought down in error, and then bring up the other one.
+
+In the `ray job submit` output, you will see something like
 
 ```
 (TorchTrainer pid=516, ip=172.19.0.4) Worker 0 has failed.
@@ -377,7 +380,7 @@ And, in the `ray job submit` output, you will see something like
 
 as the job switches to the other worker and resumes from checkpoint.
 
-On the "Overview" page in the Ray dashboard, check the "Cluster status and autoscaler" visualization, and node that the node count has gone down. 
+On the "Cluster" page in the Ray dashboard, note that one worker node is "dead".
 
 Wait for the training job to finish. 
 
@@ -398,7 +401,7 @@ Re-start the worker you stopped with one of -
 
 Finally, let's try using Ray Tune! Ray Tune makes it easy to run a distributed hyperparamter optimization, with intelligent scheduling e.g. aborting runs that are not looking promising. 
 
-Switch to the `tune` branch to see this version of the code - 
+Close `train.py` if it is open. Then, switch to the `tune` branch to see this version of the code - 
 
 ```bash
 # run in a terminal inside jupyter container
