@@ -28,7 +28,7 @@ Open a terminal inside this Jupyter environment ("File > New > New Terminal") an
 ```bash
 # run in a terminal inside jupyter container
 cd ~/work
-git clone https://github.com/teaching-on-testbeds/gourmetgram-train -b lightning
+git clone --branch lightning --single-branch https://github.com/teaching-on-testbeds/gourmetgram-train
 ```
 
 In the `gourmetgram-train` directory, open `train.py`, and view it directly there.
@@ -417,7 +417,7 @@ In this version of the code,
 * we have added some new imports
 * we made some changes to our `config` to specify the hyperparameters we want to tune. We will consider two batch sizes, and we will randomly sample different dropout probabilities:
 
-```
+```python
 config = {
     "batch_size": tune.choice([32, 64]),
     "dropout_probability": tune.uniform(0.1, 0.8),

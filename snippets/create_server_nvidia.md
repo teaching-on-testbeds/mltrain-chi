@@ -1,14 +1,9 @@
 
-
-
 ::: {.cell .markdown}
 
 ## Launch and set up NVIDIA A100 40GB server - with python-chi
 
-At the beginning of the lease time, we will bring up our GPU server. We will use the `python-chi` Python API to Chameleon to provision our server. 
-
-> **Note**: if you don't have access to the Chameleon Jupyter environment, or if you prefer to set up your NVIDIA server by hand, the next section provides alternative instructions! If you want to set up your server "by hand", skip to the next section.
-
+At the beginning of the lease time, we will bring up our GPU server. We will use the `python-chi` Python API to Chameleon to provision our server.
 
 We will execute the cells in this notebook inside the Chameleon Jupyter environment.
 
@@ -18,10 +13,11 @@ Run the following cell, and make sure the correct project is selected:
 
 ::: {.cell .code}
 ```python
+# run in Chameleon Jupyter environment
 from chi import server, context, lease
 import os
 
-context.version = "1.0" 
+context.version = "1.0"
 context.choose_project()
 context.choose_site(default="CHI@TACC")
 ```
@@ -35,7 +31,8 @@ Change the string in the following cell to reflect the name of *your* lease (**w
 
 ::: {.cell .code}
 ```python
-l = lease.get_lease(f"mltrain_netID") 
+# run in Chameleon Jupyter environment
+l = lease.get_lease(f"mltrain_netID")
 l.show()
 ```
 :::
@@ -44,26 +41,26 @@ l.show()
 
 The status should show as "ACTIVE" now that we are past the lease start time.
 
-The rest of this notebook can be executed without any interactions from you, so at this point, you can save time by clicking on this cell, then selecting "Run" > "Run Selected Cell and All Below" from the Jupyter menu.  
+The rest of this notebook can be executed without any interactions from you, so at this point, you can save time by clicking on this cell, then selecting "Run" > "Run Selected Cell and All Below" from the Jupyter menu.
 
-As the notebook executes, monitor its progress to make sure it does not get stuck on any execution error, and also to see what it is doing!
+As the notebook executes, monitor its progress to make sure it does not get stuck on any execution error, and also to see what it is doing.
 
 :::
 
 ::: {.cell .markdown}
 
-We will use the lease to bring up a server with the `CC-Ubuntu24.04-CUDA` disk image. 
+We will use the lease to bring up a server with the `CC-Ubuntu24.04-CUDA` disk image.
 
-> **Note**: the following cell brings up a server only if you don't already have one with the same name! (Regardless of its error state.) If you have a server in ERROR state already, delete it first in the Horizon GUI before you run this cell.
+> **Note**: the following cell brings up a server only if you do not already have one with the same name (regardless of its error state). If you have a server in ERROR state already, delete it first in the Horizon GUI before you run this cell.
 
 :::
 
-
 ::: {.cell .code}
 ```python
-username = os.getenv('USER') # all exp resources will have this prefix
+# run in Chameleon Jupyter environment
+username = os.getenv('USER')
 s = server.Server(
-    f"node-mltrain-{username}", 
+    f"node-mltrain-{username}",
     reservation_id=l.node_reservations[0]["id"],
     image_name="CC-Ubuntu24.04-CUDA"
 )
@@ -79,18 +76,20 @@ Note: security groups are not used at Chameleon bare metal sites, so we do not h
 
 ::: {.cell .markdown}
 
-Then, we'll associate a floating IP with the instance, so that we can access it over SSH.
+Then, we will associate a floating IP with the instance, so that we can access it over SSH.
 
 :::
 
 ::: {.cell .code}
 ```python
+# run in Chameleon Jupyter environment
 s.associate_floating_ip()
 ```
 :::
 
 ::: {.cell .code}
 ```python
+# run in Chameleon Jupyter environment
 s.refresh()
 s.check_connectivity()
 ```
@@ -104,28 +103,26 @@ In the output below, make a note of the floating IP that has been assigned to yo
 
 ::: {.cell .code}
 ```python
+# run in Chameleon Jupyter environment
 s.refresh()
 s.show(type="widget")
 ```
 :::
 
-
-
-
 ::: {.cell .markdown}
 
 ## Retrieve code and notebooks on the instance
 
-Now, we can use `python-chi` to execute commands on the instance, to set it up. We'll start by retrieving the code and other materials on the instance.
+Now, we can use `python-chi` to execute commands on the instance to set it up. We will start by retrieving the code and other materials on the instance.
 
 :::
 
 ::: {.cell .code}
 ```python
-s.execute("git clone --recurse-submodules https://github.com/teaching-on-testbeds/mltrain-chi")
+# run in Chameleon Jupyter environment
+s.execute("git clone --branch main --single-branch https://github.com/teaching-on-testbeds/mltrain-chi")
 ```
 :::
-
 
 ::: {.cell .markdown}
 
@@ -137,6 +134,7 @@ To use common deep learning frameworks like Tensorflow or PyTorch, and distribut
 
 ::: {.cell .code}
 ```python
+# run in Chameleon Jupyter environment
 s.execute("curl -sSL https://get.docker.com/ | sudo sh")
 s.execute("sudo groupadd -f docker; sudo usermod -aG docker $USER")
 ```
@@ -146,13 +144,13 @@ s.execute("sudo groupadd -f docker; sudo usermod -aG docker $USER")
 
 ## Set up the NVIDIA container toolkit
 
-
 We will also install the NVIDIA container toolkit, with which we can access GPUs from inside our containers.
 
 :::
 
 ::: {.cell .code}
 ```python
+# run in Chameleon Jupyter environment
 s.execute("curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
   && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
     sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
@@ -168,25 +166,21 @@ s.execute("sudo systemctl restart docker")
 
 ::: {.cell .markdown}
 
-and we can install `nvtop` to monitor GPU usage:
+We can also install `nvtop` to monitor GPU usage:
 
 :::
 
-
 ::: {.cell .code}
 ```python
+# run in Chameleon Jupyter environment
 s.execute("sudo apt update")
 s.execute("sudo apt -y install nvtop")
 ```
 :::
 
-
-
-
-
 ::: {.cell .markdown}
 
-Leave that cell running, and in the meantime, open an SSH sesson on your server. From your local terminal, run
+Leave that cell running, and in the meantime, open an SSH session on your server. From your local terminal, run
 
 ```
 ssh -i ~/.ssh/id_rsa_chameleon cc@A.B.C.D
@@ -194,8 +188,7 @@ ssh -i ~/.ssh/id_rsa_chameleon cc@A.B.C.D
 
 where
 
-* in place of `~/.ssh/id_rsa_chameleon`, substitute the path to your own key that you had uploaded to CHI@TACC
-* in place of `A.B.C.D`, use the floating IP address you just associated to your instance.
-
+* in place of `~/.ssh/id_rsa_chameleon`, substitute the path to your own key that you uploaded to CHI@TACC
+* in place of `A.B.C.D`, use the floating IP address you just associated with your instance.
 
 :::

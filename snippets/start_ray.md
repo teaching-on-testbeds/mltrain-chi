@@ -40,7 +40,7 @@ To bring up the cluster, follow the instructions for the GPU type that you are u
 
 :::
 
-::: {.cell .markdown}
+::: {.cell .markdown .gpu-amd}
 
 ### Start the Ray cluster - AMD GPUs
 
@@ -104,7 +104,7 @@ docker exec ray-worker-1 "rocm-smi"
 :::
 
 
-::: {.cell .markdown}
+::: {.cell .markdown .gpu-nvidia}
 
 ### Start the Ray cluster - NVIDIA GPUs
 
