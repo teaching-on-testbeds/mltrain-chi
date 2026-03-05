@@ -12,9 +12,9 @@ This lab requires a node with two GPUs.
 
 We can browse Chameleon hardware configurations for suitable node types using the [Hardware Browser](https://chameleoncloud.org/hardware/). For example, to find nodes with 2x GPUs: if we expand "Advanced Filters", check the "2" box under "GPU count", and then click "View", we can identify some suitable node types.
 
-For NVIDIA GPUs, we will use the `compute_liqid` node type at CHI@TACC.
+For AMD GPUs, we will use the `gpu_mi100` node type at CHI@TACC.
 
-The `compute_liqid` nodes at CHI@TACC have one or two NVIDIA A100 40GB GPUs. As of this writing, `liqid01` and `liqid02` have two GPUs and are suitable for this lab.
+Most of the `gpu_mi100` nodes have two AMD MI100 GPUs. (One of the `gpu_mi100` nodes, `c03-04`, has only one GPU; avoid this one.)
 
 Once you decide which GPU type to use, continue with `1_create_lease.ipynb`.
 
@@ -31,7 +31,7 @@ We can use the OpenStack graphical user interface, Horizon, to submit a lease at
 
 Then,
 
--   On the left side, click on "Reservations" \> "Leases", and then click on "Host Calendar". In the "Node type" drop down menu, change the type to `compute_liqid` to see the schedule of availability. You may change the date range setting to "30 days" to see a longer time scale. Note that the dates and times in this display are in UTC. You can use [WolframAlpha](https://www.wolframalpha.com/) or equivalent to convert to your local time zone.
+-   On the left side, click on "Reservations" \> "Leases", and then click on "Host Calendar". In the "Node type" drop down menu, change the type to `gpu_mi100` to see the schedule of availability. You may change the date range setting to "30 days" to see a longer time scale. Note that the dates and times in this display are in UTC. You can use [WolframAlpha](https://www.wolframalpha.com/) or equivalent to convert to your local time zone.
 -   Once you have identified an available three-hour block in UTC time that works for you in your local time zone, make a note of:
     -   the start and end time of the time you will try to reserve. (Note that if you mouse over an existing reservation, a pop up will show you the exact start and end time of that reservation.)
     -   and the name of the node you want to reserve. (We will reserve nodes by name, not by type, to avoid getting a 1-GPU node when we wanted a 2-GPU node.)
@@ -54,13 +54,13 @@ Since you will need the full lease time to execute your experiment, you should r
 
 When you are ready to begin, open this experiment on Trovi:
 
--   Use this link: [Train ML models with Ray (NVIDIA)](https://trovi.chameleoncloud.org/dashboard/artifacts/b4578c82-e84a-4353-83d2-fbecf153eefd) on Trovi
+-   Use this link: [Train ML models with Ray (AMD)](https://trovi.chameleoncloud.org/dashboard/artifacts/d48d7684-cf6d-4c33-bcd6-5504266bc3d4) on Trovi
 
 -   Then, click "Launch on Chameleon". This will start a new Jupyter server for you, with the experiment materials already in it.
 
 At the beginning of your lease time, inside the `mltrain-chi` directory, continue with `2_create_server.ipynb`.
 
-## Launch and set up NVIDIA A100 40GB server - with python-chi
+## Launch and set up AMD MI100 server - with python-chi
 
 At the beginning of the lease time, we will bring up our GPU server. We will use the `python-chi` Python API to Chameleon to provision our server.
 
@@ -92,7 +92,7 @@ The rest of this notebook can be executed without any interactions from you, so 
 
 As the notebook executes, monitor its progress to make sure it does not get stuck on any execution error, and also to see what it is doing.
 
-We will use the lease to bring up a server with the `CC-Ubuntu24.04-CUDA` disk image.
+We will use the lease to bring up a server with the `CC-Ubuntu24.04-ROCm` disk image. (The default Ubuntu 24.04 kernel is not compatible with the AMD GPU on these nodes.)
 
 > **Note**: the following cell brings up a server only if you do not already have one with the same name (regardless of its error state). If you have a server in ERROR state already, delete it first in the Horizon GUI before you run this cell.
 
@@ -102,7 +102,7 @@ username = os.getenv('USER')
 s = server.Server(
     f"node-mltrain-{username}",
     reservation_id=l.node_reservations[0]["id"],
-    image_name="CC-Ubuntu24.04-CUDA"
+    image_name="CC-Ubuntu24.04-ROCm"
 )
 s.submit(idempotent=True)
 ```
@@ -136,7 +136,7 @@ Now, we can use `python-chi` to execute commands on the instance to set it up. W
 
 ``` python
 # run in Chameleon Jupyter environment
-s.execute("git clone --branch main --single-branch https://github.com/teaching-on-testbeds/mltrain-chi")
+s.execute("git clone --branch amd --single-branch https://github.com/teaching-on-testbeds/mltrain-chi")
 ```
 
 ## Set up Docker
@@ -149,30 +149,24 @@ s.execute("curl -sSL https://get.docker.com/ | sudo sh")
 s.execute("sudo groupadd -f docker; sudo usermod -aG docker $USER")
 ```
 
-## Set up the NVIDIA container toolkit
+## Verify AMD GPU access
 
-We will also install the NVIDIA container toolkit, with which we can access GPUs from inside our containers.
+Run
 
 ``` python
 # run in Chameleon Jupyter environment
-s.execute("curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
-  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list")
-s.execute("sudo apt update")
-s.execute("sudo apt-get install -y nvidia-container-toolkit")
-s.execute("sudo nvidia-ctk runtime configure --runtime=docker")
-# for https://github.com/NVIDIA/nvidia-container-toolkit/issues/48
-s.execute("sudo jq 'if has(\"exec-opts\") then . else . + {\"exec-opts\": [\"native.cgroupdriver=cgroupfs\"]} end' /etc/docker/daemon.json | sudo tee /etc/docker/daemon.json.tmp > /dev/null && sudo mv /etc/docker/daemon.json.tmp /etc/docker/daemon.json")
-s.execute("sudo systemctl restart docker")
+s.execute("rocm-smi")
 ```
 
-We can also install `nvtop` to monitor GPU usage:
+and verify that you can see the GPU(s).
+
+We can also install `nvtop` to monitor GPU usage. We install from source because older versions in Ubuntu package repositories do not support AMD GPUs.
 
 ``` python
 # run in Chameleon Jupyter environment
-s.execute("sudo apt update")
-s.execute("sudo apt -y install nvtop")
+s.execute("sudo apt -y install cmake libncurses-dev libsystemd-dev libudev-dev libdrm-dev libgtest-dev")
+s.execute("git clone https://github.com/Syllo/nvtop")
+s.execute("mkdir -p nvtop/build && cd nvtop/build && cmake .. -DAMDGPU_SUPPORT=ON && sudo make install")
 ```
 
 Leave that cell running, and in the meantime, open an SSH session on your server. From your local terminal, run
@@ -252,28 +246,39 @@ but we will focus specifically on the first three - Ray Cluster, Ray Train, and 
 
 To bring up the cluster, follow the instructions for the GPU type that you are using - AMD or NVIDIA.
 
-### Start the Ray cluster - NVIDIA GPUs
+### Start the Ray cluster - AMD GPUs
 
-> **Note**: Follow these instructions only if you are running this experiment on a node with NVIDIA GPUs.
+> **Note**: Follow these instructions only if you are running this experiment on a node with AMD GPUs.
 
 For the Ray experiment, you must use a node with two GPUs. Run
 
 ``` bash
 # run on node-mltrain
-nvidia-smi
+rocm-smi
 ```
 
 and confirm that you see two GPUs.
+
+First, we're going to build a container image for the Ray worker nodes, with Ray and ROCm installed. Run
+
+``` bash
+# run on node-mltrain
+docker build -t ray-rocm:2.54.0 -f mltrain-chi/docker/Dockerfile.ray-rocm .
+```
+
+It will take 5-10 minutes to build the container image.
+
+You can see this Dockerfile here: [Dockerfile.ray-rocm](https://github.com/teaching-on-testbeds/mltrain-chi/blob/main/docker/Dockerfile.ray-rocm).
 
 We'll bring up our Ray cluster with Docker Compose. Run:
 
 ``` bash
 # run on node-mltrain
 export HOST_IP=$(curl --silent http://169.254.169.254/latest/meta-data/public-ipv4 )
-docker compose -f mltrain-chi/docker/docker-compose-ray-cuda.yaml up -d
+docker compose -f mltrain-chi/docker/docker-compose-ray-rocm.yaml up -d
 ```
 
-You can see this Docker Compose YAML here: [docker-compose-ray-cuda.yaml](https://github.com/teaching-on-testbeds/mltrain-chi/blob/main/docker/docker-compose-ray-cuda.yaml).
+You can see this Docker Compose YAML here: [docker-compose-ray-rocm.yaml](https://github.com/teaching-on-testbeds/mltrain-chi/blob/main/docker/docker-compose-ray-rocm.yaml).
 
 When it is finished, the output of
 
@@ -284,21 +289,19 @@ docker ps
 
 should show that the `ray-head`, `ray-worker-0`, and `ray-worker-1` containers are running.
 
-Although the host has 2 GPUs, we only passed one to each worker. Run
+Verify that a GPU is visible to each of the worker nodes.
 
 ``` bash
 # run on node-mltrain
-docker exec -it ray-worker-0 nvidia-smi --list-gpus
+docker exec ray-worker-0 "rocm-smi"
 ```
 
 and
 
 ``` bash
 # run on node-mltrain
-docker exec -it ray-worker-1 nvidia-smi --list-gpus
+docker exec ray-worker-1 "rocm-smi"
 ```
-
-and confirm that only one GPU appears in the output, and it is a different GPU (different UUID) in each.
 
 ### Start a Jupyter container
 

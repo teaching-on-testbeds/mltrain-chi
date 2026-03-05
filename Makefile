@@ -1,4 +1,4 @@
-GPU ?= nvidia
+GPU ?= amd
 
 FILTER := filters/gpu_select.lua
 INDEX_OUT := index.md
