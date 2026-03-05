@@ -97,13 +97,15 @@ ray job submit --runtime-env runtime.json --entrypoint-num-gpus 2 --entrypoint-n
 
 noting that we have no node with 2 GPUs - only two nodes, each with 1 GPU. 
 
-In the Ray dashboard "Overview" page, observe that this request is listed in "Demands" in the "Resource Status" section.
+In the Ray dashboard "Overview" page, observe that this request is listed in "Pending Demands" in the "Resource Status" section.
 
-The job will be stuck in PENDING state until we add a node with 2 GPUs to the cluster, at which time it can be scheduled.
+The job will be stuck in PENDING state until we add a node with 2 GPUs to the cluster, at which time it can be scheduled. 
+
+(In future `ray submit` job logs, you may notice messages about "Error: No available node types can fulfill resource request {'CPU': 8.0, 'GPU': 2.0}. Add suitable node types to this cluster to resolve this issue." - this message relates to the infeasible job left in PENDING state.)
 
 In a commercial cloud, when deployed with Kubernetes, a Ray cluster could [autoscale](https://docs.ray.io/en/latest/cluster/vms/user-guides/configuring-autoscaling.html) in this situation to accommodate the demand that could not be satisfied. Our cluster is not auto-scaling and we are not going to add a node with 2 GPUs, so this job will wait forever.
 
-Use Ctrl+C to stop the process in the Jupyter terminal. (The job is still submitted and PENDING, but not consuming worker resources, since it cannot be scheduled.)
+Use Ctrl+C to stop the process in the Jupyter terminal. (Note: Ctrl+C does not un-submit the job. The job is still submitted and PENDING, but it is not consuming worker resources, since it cannot be scheduled.)
 
 :::
 
@@ -184,7 +186,12 @@ Let's try our Ray Train script. Since we define the resource requirements in the
 ray job submit --runtime-env runtime.json  --working-dir .  -- python gourmetgram-train/train.py 
 ```
 
-Submit the job, and note that it runs mostly as before. Let it run until it is finished.
+Submit the job, and note that it runs mostly as before. 
+
+While it is running, open the MinIO dashboard, and note a new Ray Train run in the `ray` bucket. You should see checkpoints logged regularly in this run.
+
+Let this job run until it is finished.
+
 
 :::
 
@@ -387,7 +394,7 @@ Re-start the worker you stopped with one of -
 
 ::: {.cell .markdown}
 
-### Optional: Use Ray Tune for hyperparameter optimization
+### Use Ray Tune for hyperparameter optimization
 
 Finally, let's try using Ray Tune! Ray Tune makes it easy to run a distributed hyperparamter optimization, with intelligent scheduling e.g. aborting runs that are not looking promising. 
 
@@ -414,29 +421,67 @@ config = {
     ...
 ```
 
-* the `config` is not passed directly to the `trainer` anymore, 
-* and, instead of calling `fit` on `trainer`, we wrap our trainer in a Tune function, and `fit` that. We are using `ASHAScheduler`, a kind of [hyperband](https://arxiv.org/abs/1603.06560) scheduler which early-stops less promising runs:
+* the `config` is now the Tune search space, and each trial runs `train_func` directly with sampled hyperparameters,
 
 ```python
+### New for Ray Tune - wrap all the Lightning code in a function
+def train_func(config):
+    ...
+```
 
+* and we use `TuneReportCheckpointCallback` to report validation metrics back to Tune each epoch. 
+
+```python
+tune_report_callback = TuneReportCheckpointCallback(
+    metrics={
+        "ptl/val_accuracy": "val_accuracy",
+        "ptl/val_loss": "val_loss",
+    },
+    filename="checkpoint",
+    on="validation_end",
+)
+
+trainer = Trainer(
+    max_epochs=config["total_epochs"],
+    devices=1,
+    accelerator="auto",
+    callbacks=[early_stopping_callback, backbone_finetuning_callback, tune_report_callback]
+)
+```
+
+* We are using `ASHAScheduler`, a kind of [hyperband](https://arxiv.org/abs/1603.06560) scheduler which early-stops less promising runs:
+
+```python
 ### New for Ray Tune
-def tune_asha(num_samples:
+def tune_asha(num_samples):
     scheduler = ASHAScheduler(max_t=config["total_epochs"], grace_period=1, reduction_factor=2)
+
+    trainable = tune.with_resources(train_func, resources={"CPU": 4, "GPU": 0.5})
+
     tuner = tune.Tuner(
-        trainer,   # this is the original trainer!
-        param_space={"train_loop_config": config},  # pass our config here instead
+        trainable=trainable,
+        param_space=config,
         tune_config=tune.TuneConfig(
-            metric="val_accuracy",
+            metric="ptl/val_accuracy",
             mode="max",
             num_samples=num_samples,
             scheduler=scheduler,
+            max_concurrent_trials=4,
         ),
+        run_config=tune.RunConfig(storage_path="s3://ray"),
     )
     return tuner.fit()
 
-
 results = tune_asha(num_samples=16)
 ```
+
+In this scheduler configuration,
+
+* `max_t=config["total_epochs"]` sets the maximum training budget per trial. A trial can run up to the same number of epochs as a full training run.
+* `grace_period=1` means ASHA will let every trial run for at least one reported iteration (here, one epoch) before it can be stopped.
+* `reduction_factor=2` controls how aggressively we prune. At each comparison level, only the stronger fraction of trials continue and weaker ones are terminated.
+
+This means every trial gets a short chance to show signal, then ASHA progressively focuses cluster resources on trials with better `ptl/val_accuracy`.
 
 
 Run
@@ -449,9 +494,33 @@ ray job submit --runtime-env runtime.json  --working-dir .  -- python gourmetgra
 to submit the job.
 
 
-The initial output (which is also available from the job logs in the Ray dashboard, if you miss it in the terminal!) will show you which configurations were randomly samples, and it will start 8 training samples to evaluate those configurations.
+The initial output (which is also available from the job logs in the Ray dashboard, if you miss it in the terminal!) will show you which configurations were randomly sampled, and it will start up to 4 trials at a time while evaluating all 16 samples.
 
-However, as the training job progresses, you will see that some jobs are "TERMINATED" in fewer than 20 epochs, because other hyperparameter configurations were judged more effective. This saves resources on the cluster, compared to a grid search or a random search.
+As the training job progresses, you should see output like this appear regularly:
+
+```
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Trial name               status         batch_size     dropout_probability     iter     total time (s)     ptl/val_accuracy     ptl/val_loss │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ train_func_11f00_00000   RUNNING                32                0.433997        7           173.919              0.730029         1.0098   │
+│ train_func_11f00_00001   RUNNING                32                0.113473        7           192.862              0.745773         0.939065 │
+│ train_func_11f00_00003   RUNNING                64                0.122041        8           188.831              0.743149         0.951746 │
+│ train_func_11f00_00007   RUNNING                32                0.686287                                                                   │
+│ train_func_11f00_00002   TERMINATED             64                0.525657        1            24.3521             0.359767         2.05659  │
+│ train_func_11f00_00004   TERMINATED             64                0.140747        1            22.7762             0.394461         2.00633  │
+│ train_func_11f00_00005   TERMINATED             32                0.775716        1            24.5428             0.361808         2.02158  │
+│ train_func_11f00_00006   TERMINATED             32                0.431293        4            86.679              0.661808         1.34078  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+Here,
+
+* each row is one trial with one hyperparameter configuration,
+* `iter` is how many reported iterations (epochs) that trial has completed,
+* `ptl/val_accuracy` and `ptl/val_loss` are the validation metrics reported from Lightning,
+* and `TERMINATED` means ASHA has stopped a less promising trial, so cluster resources can be used for better-performing trials.
+
+This saves resources on the cluster, compared to a grid search or a random search. We can identify high-performing hyperparameters in not much more time than it takes to run a single trial!
 
 
 :::
@@ -486,4 +555,3 @@ docker stop jupyter
 
 
 :::
-
