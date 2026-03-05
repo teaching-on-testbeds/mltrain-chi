@@ -24,7 +24,7 @@ We'll proceed with the `gpu_mi100` and `compute_liqid` node types at CHI@TACC.
 * Most of the `gpu_mi100` nodes have two AMD MI100 GPUs. (One of the `gpu_mi100` nodes, `c03-04` has only one GPU; we'll avoid this one for the "Ray" section, which requires two GPUs.)
 * The `compute_liqid` nodes at CHI@TACC have one or two NVIDIA A100 40GB GPUs. As of this writing, `liqid01` and `liqid02` have two GPUs, so we may use these two for the "Ray" section, which requires two GPUs. 
 
-You can decide which type to use based on availability; but once you decide, make sure to follow the instructions specific to that GPU type. In some parts, there will be different instructions for setting up an AMD GPU node vs. and NVIDIA GPU node.
+You can decide which type to use based on availability; but once you decide, make sure to follow the instructions specific to that GPU type. In some parts, there will be different instructions for setting up an AMD GPU node vs. an NVIDIA GPU node.
 
 
 :::

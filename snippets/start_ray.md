@@ -159,6 +159,7 @@ and confirm that only one GPU appears in the output, and it is a different GPU (
 :::
 
 
+
 ::: {.cell .markdown}
 
 ### Start a Jupyter container
@@ -188,16 +189,16 @@ Then, run
 
 ```bash
 # run on node-mltrain
-docker logs jupyter
+docker exec jupyter jupyter server list
 ```
 
 and look for a line like
 
 ```
-http://127.0.0.1:8888/lab?token=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+http://localhost:8888/lab?token=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
-Paste this into a browser tab, but in place of `127.0.0.1`, substitute the floating IP assigned to your instance, to open the Jupyter notebook interface.
+Paste this into a browser tab, but in place of `localhost`, substitute the floating IP assigned to your instance, to open the Jupyter notebook interface.
 
 In the file browser on the left side, open the `work` directory.
 
@@ -226,5 +227,27 @@ http://A.B.C.D:8265
 where in place of `A.B.C.D`, substitute the floating IP associated with your server.
 
 Click on the "Cluster" tab and verify that you see your head node and two worker nodes.
+
+:::
+
+::: {.cell .markdown}
+
+### Access MinIO dashboard
+
+
+MinIO will be used to save artifacts (specifically, model checkpoints) from Ray training runs. The MinIO dashboard runs on port 9001. In a browser, open
+
+```
+http://A.B.C.D:9001
+```
+
+where in place of `A.B.C.D`, substitute the floating IP associated with your server.
+
+Log in with the credentials we specified in the Docker Compose YAML:
+
+* Username: `your-access-key`
+* Password: `your-secret-key`
+
+Then, in the "Buckets" sidebar, note the `ray` storage bucket that we created as part of the Docker Compose. In the MinIO object browser, you can look at the files that have been uploaded to the object store - but, we haven't used Ray yet, so for now there is nothing interesting here.
 
 :::
