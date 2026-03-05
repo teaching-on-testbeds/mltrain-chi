@@ -73,10 +73,10 @@ where we pass
 
 While it is running, click on the "Overview", "Cluster", and "Jobs" tabs in the Ray dashboard.
 
-* Initially, the job will be a in PENDING state, as the runtime environment is set up. This is slow the first time (because of downloading the Python packages), but faster in subsequent runs because the packages are cached on the workers.
+* Initially, the job will be in PENDING state, as the runtime environment is set up. This is slow the first time (because of downloading the Python packages), but faster in subsequent runs because the packages are cached on the workers.
 * Then, the job will be in RUNNING state. Eventually, it should go to SUCCEEDED.
 * You will see the job's requested GPU and CPU resource in the "Resource Status" section of the "Overview" page, which shows the cumulative resource requests of all jobs running on the cluster.
-* As the job runs, if you are using NVIDIA GPUs you'll see one of the worker nodes has higher GPU utilization, in the "Cluster" tab. (Ray does not support this visualization for AMD GPUs, so if a node has an AMD GPU it will show "NA" in this field, even though the GPU is used by the worker to execute jobs.)
+* As the job runs, you'll see one of the worker nodes has high GPU utilization, in the "Cluster" tab. 
 * You can click on the job and, in the "Logs", see the output of the job.
 
 Let the training job finish, and get to SUCCEEDED state. (This may take up to 10-15 minutes.)
@@ -486,5 +486,4 @@ docker stop jupyter
 
 
 :::
-
 

@@ -21,7 +21,7 @@ We'll proceed with the `gpu_mi100` and `compute_liqid` node types at CHI@TACC.
 * Most of the `gpu_mi100` nodes have two AMD MI100 GPUs. (One of the `gpu_mi100` nodes, `c03-04` has only one GPU; we'll avoid this one for the "Ray" section, which requires two GPUs.)
 * The `compute_liqid` nodes at CHI@TACC have one or two NVIDIA A100 40GB GPUs. As of this writing, `liqid01` and `liqid02` have two GPUs, so we may use these two for the "Ray" section, which requires two GPUs. 
 
-You can decide which type to use based on availability; but once you decide, make sure to follow the instructions specific to that GPU type. In some parts, there will be different instructions for setting up an AMD GPU node vs. and NVIDIA GPU node.
+You can decide which type to use based on availability; but once you decide, make sure to follow the instructions specific to that GPU type. In some parts, there will be different instructions for setting up an AMD GPU node vs. an NVIDIA GPU node.
 
 
 
@@ -312,16 +312,16 @@ Then, run
 
 ```bash
 # run on node-mltrain
-docker logs jupyter
+docker exec jupyter jupyter server list
 ```
 
 and look for a line like
 
 ```
-http://127.0.0.1:8888/lab?token=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+http://localhost:8888/lab?token=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
-Paste this into a browser tab, but in place of `127.0.0.1`, substitute the floating IP assigned to your instance, to open the Jupyter notebook interface.
+Paste this into a browser tab, but in place of `localhost`, substitute the floating IP assigned to your instance, to open the Jupyter notebook interface.
 
 In the file browser on the left side, open the `work` directory.
 
@@ -421,10 +421,10 @@ where we pass
 
 While it is running, click on the "Overview", "Cluster", and "Jobs" tabs in the Ray dashboard.
 
-* Initially, the job will be a in PENDING state, as the runtime environment is set up. This is slow the first time (because of downloading the Python packages), but faster in subsequent runs because the packages are cached on the workers.
+* Initially, the job will be in PENDING state, as the runtime environment is set up. This is slow the first time (because of downloading the Python packages), but faster in subsequent runs because the packages are cached on the workers.
 * Then, the job will be in RUNNING state. Eventually, it should go to SUCCEEDED.
 * You will see the job's requested GPU and CPU resource in the "Resource Status" section of the "Overview" page, which shows the cumulative resource requests of all jobs running on the cluster.
-* As the job runs, if you are using NVIDIA GPUs you'll see one of the worker nodes has higher GPU utilization, in the "Cluster" tab. (Ray does not support this visualization for AMD GPUs, so if a node has an AMD GPU it will show "NA" in this field, even though the GPU is used by the worker to execute jobs.)
+* As the job runs, you'll see one of the worker nodes has high GPU utilization, in the "Cluster" tab. 
 * You can click on the job and, in the "Logs", see the output of the job.
 
 Let the training job finish, and get to SUCCEEDED state. (This may take up to 10-15 minutes.)
@@ -817,7 +817,6 @@ and then stop the Jupyter server with
 # run on node-mltrain
 docker stop jupyter
 ```
-
 
 
 
