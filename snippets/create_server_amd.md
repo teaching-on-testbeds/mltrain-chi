@@ -131,7 +131,7 @@ s.execute("git clone --recurse-submodules https://github.com/teaching-on-testbed
 
 ## Set up Docker
 
-To use common deep learning frameworks like Tensorflow or PyTorch, and ML training platforms like MLFlow and Ray, we can run containers that have all the prerequisite libraries necessary for these frameworks. Here, we will set up the container framework.
+To use common deep learning frameworks like Tensorflow or PyTorch, and distributed training platforms like Ray, we can run containers that have all the prerequisite libraries necessary for these frameworks. Here, we will set up the container framework.
 
 :::
 
@@ -256,34 +256,6 @@ We can also install `nvtop` to monitor GPU usage - we'll install from source, be
 s.execute("sudo apt -y install cmake libncurses-dev libsystemd-dev libudev-dev libdrm-dev libgtest-dev")
 s.execute("git clone https://github.com/Syllo/nvtop")
 s.execute("mkdir -p nvtop/build && cd nvtop/build && cmake .. -DAMDGPU_SUPPORT=ON && sudo make install")
-```
-:::
-
-
-::: {.cell .markdown}
-
-###  Build a container image - for MLFlow section
-
-
-Finally, we will build a container image in which to work in the MLFlow section, that has:
-
-* a Jupyter notebook server
-* Pytorch and Pytorch Lightning
-* ROCm, which allows deep learning frameworks like Pytorch to use the AMD GPU accelerator
-* and MLFlow
-
-You can see our Dockerfile for this image at: [Dockerfile.jupyter-torch-mlflow-rocm](https://github.com/teaching-on-testbeds/mltrain-chi/tree/main/docker/Dockerfile.jupyter-torch-mlflow-rocm)
-
-
-Building this container will take a **very long** time (ROCm is huge). But that's OK: we can get it started and then continue to the next section while it builds in the background, since we don't need this container immediately. We just need it to finish by the "Start a Jupyter server" subsection of the "Start the tracking server" section.
-
-
-:::
-
-
-::: {.cell .code}
-```python
-s.execute("docker build -t jupyter-mlflow -f mltrain-chi/docker/Dockerfile.jupyter-torch-mlflow-rocm .")
 ```
 :::
 

@@ -2,7 +2,7 @@ name: ray_cluster
 services:
   # MinIO object store service provides storage for checkpoints from Ray Train jobs
   minio:
-    image: minio/minio
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: minio
     restart: always
     expose:
@@ -24,7 +24,7 @@ services:
   # When the minio service has started, launch a container with the minio client
   # and use it to create a bucket named ray
   minio-create-bucket:
-    image: minio/mc
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z-cpuv1
     depends_on:
       minio:
         condition: service_healthy
@@ -39,7 +39,7 @@ services:
       fi"
 
   ray-head:
-    image: rayproject/ray:2.42.1
+    image: rayproject/ray:2.54.0
     container_name: ray-head
     command: |
       /bin/sh -c "
@@ -99,7 +99,7 @@ services:
       - ray-head
 
   ray-worker-1:
-    image: rayproject/ray:2.42.1-gpu
+    image: rayproject/ray:2.54.0-gpu
     container_name: ray-worker-0
     command: ["ray", "start", "--address=ray-head:6379", "--num-cpus=32", "--num-gpus=1", "--block"]
     deploy:
@@ -120,7 +120,7 @@ services:
       - ray-head
 
   ray-worker-2:
-    image: rayproject/ray:2.42.1-gpu
+    image: rayproject/ray:2.54.0-gpu
     container_name: ray-worker-1
     command: ["ray", "start", "--address=ray-head:6379", "--num-cpus=32", "--num-gpus=1", "--block"]
     deploy:

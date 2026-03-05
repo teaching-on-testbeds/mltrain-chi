@@ -1,12 +1,9 @@
 
 ::: {.cell .markdown}
 
-# Train ML models with MLFlow and Ray
+# Train ML models with Ray
 
-In this tutorial, we explore some of the infrastructure and platform requirements for large model training, and to support the training of many models by many teams. We focus specifically on 
-
-* experiment tracking (using [MLFlow](https://mlflow.org/))
-* and scheduling training jobs on a GPU cluster (using [Ray](https://www.ray.io/))
+In this tutorial, we explore some of the infrastructure and platform requirements for large model training, and to support the training of many models by many teams. We focus specifically on scheduling training jobs on a GPU cluster (using [Ray](https://www.ray.io/)).
 
 To run this experiment, you should have already created an account on Chameleon, and become part of a project. You must also have added your SSH key to the CHI@TACC site.
 
@@ -18,9 +15,7 @@ To run this experiment, you should have already created an account on Chameleon,
 
 For this experiment, we will provision one bare-metal node with GPUs. 
 
-The MLFlow section is more interesting if we run it on a node with two GPUs, because then we can better understand how to configure logging in a distributed training run. But, if need be, we can run it on a node with one GPU.
-
-The Ray section requires a node with two GPUs.
+This lab requires a node with two GPUs.
 
 We can browse Chameleon hardware configurations for suitable node types using the [Hardware Browser](https://chameleoncloud.org/hardware/). For example, to find nodes with 2x GPUs: if we expand "Advanced Filters", check the "2" box under "GPU count", and then click "View", we can identify some suitable node types. 
 
@@ -42,7 +37,7 @@ You can decide which type to use based on availability; but once you decide, mak
 
 ::: {.cell .markdown}
 
-To use bare metal resources on Chameleon, we must reserve them in advance. We can reserve two separate 3-hour blocks for this experiment: one for the MLFlow section and one for the Ray section. They are designed to run independently.
+To use bare metal resources on Chameleon, we must reserve them in advance. We can reserve a 3-hour block for this experiment.
 
 We can use the OpenStack graphical user interface, Horizon, to submit a lease for an MI100 or Liquid node at CHI@TACC. To access this interface,
 
@@ -62,7 +57,7 @@ Then,
   * the start and end time of the time you will try to reserve. (Note that if you mouse over an existing reservation, a pop up will show you the exact start and end time of that reservation.)
   * and the name of the node you want to reserve. (We will reserve nodes by name, not by type, to avoid getting a 1-GPU node when we wanted a 2-GPU node.)
 * Then, on the left side, click on "Reservations" > "Leases", and then click on "Create Lease":
-  * set the "Name" to <code>mltrain_<b>netID</b>_<b>X</b></code> where in place of <code><b>netID</b></code> you substitute your actual net ID, and in place of <code><b>X</b></code>, substitute an incrementing number (to differentiate multiple leases for different sections).
+  * set the "Name" to <code>mltrain_<b>netID</b></code> where in place of <code><b>netID</b></code> you substitute your actual net ID.
   * set the start date and time in UTC. To make scheduling smoother, please start your lease on an hour boundary, e.g. `XX:00`.
   * modify the lease length (in days) until the end date is correct. Then, set the end time. To be mindful of other users, you should limit your lease time to three hours as directed. Also, to avoid a potential race condition that occurs when one lease starts immediately after another lease ends, you should end your lease five minutes before the end of an hour, e.g. at `YY:55`.
   * Click "Next".

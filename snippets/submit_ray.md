@@ -158,7 +158,7 @@ trainer = ray.train.lightning.prepare_trainer(trainer)
 
 ```
 
-* at the end, we run the training function with
+At the end, we run the training function with
 
 ```python
 run_config = RunConfig(storage_path="s3://ray")
@@ -309,7 +309,7 @@ To add fault tolerance, we
 run_config = RunConfig( ... failure_config=FailureConfig(max_failures=2))
 ```
 
-* and inside `train_fun`, we replace the old
+And inside `train_fun`, we replace the old
 
 ```python
 trainer.fit(lightning_food11_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
@@ -486,6 +486,5 @@ docker stop jupyter
 
 
 :::
-
 
 

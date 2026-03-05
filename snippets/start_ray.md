@@ -59,7 +59,7 @@ First, we're going to build a container image for the Ray worker nodes, with Ray
 
 ```bash
 # run on node-mltrain
-docker build -t ray-rocm:2.42.1 -f mltrain-chi/docker/Dockerfile.ray-rocm .
+docker build -t ray-rocm:2.54.0 -f mltrain-chi/docker/Dockerfile.ray-rocm .
 ```
 
 It will take 5-10 minutes to build the container image.

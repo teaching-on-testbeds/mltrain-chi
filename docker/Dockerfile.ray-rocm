@@ -1,7 +1,7 @@
-FROM rayproject/ray:2.42.1
+FROM rayproject/ray:2.54.0
 
-ARG ROCM_VERSION=6.4
-ARG AMDGPU_VERSION=6.4.60400
+ARG ROCM_VERSION=7.0.1
+ARG AMDGPU_VERSION=7.0.1.70001
 
 USER root
 
@@ -12,7 +12,9 @@ RUN wget https://repo.radeon.com/amdgpu-install/$ROCM_VERSION/ubuntu/jammy/amdgp
 RUN amdgpu-install --usecase=rocm -y && rm *.deb  
 
 # Install PyTorch with ROCm compatibility, and Lightning
-RUN pip install --pre --no-cache-dir  --index-url https://download.pytorch.org/whl/nightly/rocm6.4/ \
+RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/rocm7.0 \
     'torch' \
     'torchaudio' \
     'torchvision'
+
+RUN pip install --no-cache-dir 'lightning'

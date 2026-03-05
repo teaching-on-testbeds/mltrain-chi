@@ -1,3 +1,5 @@
 torch
 torchvision
 lightning
+boto3
+s3fs

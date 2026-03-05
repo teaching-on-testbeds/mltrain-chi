@@ -4,13 +4,8 @@ all: \
 	1_create_server_amd.ipynb \
 	1_create_server_nvidia.ipynb \
 	2_prepare_data.ipynb \
-	3_start_mlflow.ipynb \
-	4_mlflow_track_torch.ipynb \
-	5_mlflow_track_lightning.ipynb \
-	6_mlflow_api.ipynb \
-	7_start_ray.ipynb \
-	8_submit_ray.ipynb \
-	workspace_mlflow/mlflow_api.ipynb
+	3_start_ray.ipynb \
+	4_submit_ray.ipynb
 
 clean: 
 	rm index.md \
@@ -18,22 +13,13 @@ clean:
 	1_create_server_amd.ipynb \
 	1_create_server_nvidia.ipynb \
 	2_prepare_data.ipynb \
-	3_start_mlflow.ipynb \
-	4_mlflow_track_torch.ipynb \
-	5_mlflow_track_lightning.ipynb \
-	6_mlflow_api.ipynb \
-	7_start_ray.ipynb \
-	8_submit_ray.ipynb \
-	workspace_mlflow/mlflow_api.ipynb
+	3_start_ray.ipynb \
+	4_submit_ray.ipynb
 
 index.md: snippets/*.md 
 	cat snippets/intro.md \
 		snippets/create_server_options.md \
 		snippets/prepare_data.md \
-		snippets/start_mlflow.md \
-		snippets/mlflow_track_torch.md \
-		snippets/mlflow_track_lightning.md \
-		snippets/mlflow_api.md \
 		snippets/start_ray.md \
 		snippets/submit_ray.md \
 		> index.tmp.md
@@ -66,45 +52,14 @@ index.md: snippets/*.md
                 -o 2_prepare_data.ipynb  
 	sed -i 's/attachment://g' 2_prepare_data.ipynb
 
-
-3_start_mlflow.ipynb: snippets/start_mlflow.md
-	pandoc --resource-path=../ --embed-resources --standalone --wrap=none \
-				-i snippets/frontmatter_python.md snippets/start_mlflow.md \
-				-o 3_start_mlflow.ipynb  
-	sed -i 's/attachment://g' 3_start_mlflow.ipynb
-
-4_mlflow_track_torch.ipynb: snippets/mlflow_track_torch.md
-	pandoc --resource-path=../ --embed-resources --standalone --wrap=none \
-				-i snippets/frontmatter_python.md snippets/mlflow_track_torch.md \
-				-o 4_mlflow_track_torch.ipynb  
-	sed -i 's/attachment://g' 4_mlflow_track_torch.ipynb
-
-5_mlflow_track_lightning.ipynb: snippets/mlflow_track_torch.md
-	pandoc --resource-path=../ --embed-resources --standalone --wrap=none \
-				-i snippets/frontmatter_python.md snippets/mlflow_track_lightning.md \
-				-o 5_mlflow_track_lightning.ipynb  
-	sed -i 's/attachment://g' 5_mlflow_track_lightning.ipynb
-
-6_mlflow_api.ipynb: snippets/mlflow_api.md
-	pandoc --resource-path=../ --embed-resources --standalone --wrap=none \
-				-i snippets/frontmatter_python.md snippets/mlflow_api.md \
-				-o 6_mlflow_api.ipynb  
-	sed -i 's/attachment://g' 6_mlflow_api.ipynb
-
-workspace_mlflow/mlflow_api.ipynb: snippets/mlflow_api.md
-	pandoc --resource-path=../ --embed-resources --standalone --wrap=none \
-				-i snippets/frontmatter_python.md snippets/mlflow_api.md \
-				-o workspace_mlflow/mlflow_api.ipynb  
-	sed -i 's/attachment://g' workspace_mlflow/mlflow_api.ipynb
-
-7_start_ray.ipynb: snippets/start_ray.md
+3_start_ray.ipynb: snippets/start_ray.md
 	pandoc --resource-path=../ --embed-resources --standalone --wrap=none \
 				-i snippets/frontmatter_python.md snippets/start_ray.md \
-				-o 7_start_ray.ipynb  
-	sed -i 's/attachment://g' 7_start_ray.ipynb
+				-o 3_start_ray.ipynb  
+	sed -i 's/attachment://g' 3_start_ray.ipynb
 
-8_submit_ray.ipynb: snippets/submit_ray.md
+4_submit_ray.ipynb: snippets/submit_ray.md
 	pandoc --resource-path=../ --embed-resources --standalone --wrap=none \
 				-i snippets/frontmatter_python.md snippets/submit_ray.md \
-				-o 8_submit_ray.ipynb  
-	sed -i 's/attachment://g' 8_submit_ray.ipynb
+				-o 4_submit_ray.ipynb  
+	sed -i 's/attachment://g' 4_submit_ray.ipynb
