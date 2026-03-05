@@ -4,8 +4,8 @@ all: \
 	1_create_server_amd.ipynb \
 	1_create_server_nvidia.ipynb \
 	2_prepare_data.ipynb \
-	7_start_ray.ipynb \
-	8_submit_ray.ipynb
+	3_start_ray.ipynb \
+	4_submit_ray.ipynb
 
 clean: 
 	rm index.md \
@@ -13,8 +13,8 @@ clean:
 	1_create_server_amd.ipynb \
 	1_create_server_nvidia.ipynb \
 	2_prepare_data.ipynb \
-	7_start_ray.ipynb \
-	8_submit_ray.ipynb
+	3_start_ray.ipynb \
+	4_submit_ray.ipynb
 
 index.md: snippets/*.md 
 	cat snippets/intro.md \
@@ -52,14 +52,14 @@ index.md: snippets/*.md
                 -o 2_prepare_data.ipynb  
 	sed -i 's/attachment://g' 2_prepare_data.ipynb
 
-7_start_ray.ipynb: snippets/start_ray.md
+3_start_ray.ipynb: snippets/start_ray.md
 	pandoc --resource-path=../ --embed-resources --standalone --wrap=none \
 				-i snippets/frontmatter_python.md snippets/start_ray.md \
-				-o 7_start_ray.ipynb  
-	sed -i 's/attachment://g' 7_start_ray.ipynb
+				-o 3_start_ray.ipynb  
+	sed -i 's/attachment://g' 3_start_ray.ipynb
 
-8_submit_ray.ipynb: snippets/submit_ray.md
+4_submit_ray.ipynb: snippets/submit_ray.md
 	pandoc --resource-path=../ --embed-resources --standalone --wrap=none \
 				-i snippets/frontmatter_python.md snippets/submit_ray.md \
-				-o 8_submit_ray.ipynb  
-	sed -i 's/attachment://g' 8_submit_ray.ipynb
+				-o 4_submit_ray.ipynb  
+	sed -i 's/attachment://g' 4_submit_ray.ipynb

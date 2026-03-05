@@ -74,7 +74,7 @@ git clone --recurse-submodules https://github.com/teaching-on-testbeds/mltrain-c
 
 ## Set up Docker
 
-To use common deep learning frameworks like Tensorflow or PyTorch, and ML training platforms like MLFlow and Ray, we can run containers that have all the prerequisite libraries necessary for these frameworks. Here, we will set up the container framework.
+To use common deep learning frameworks like Tensorflow or PyTorch, and distributed training platforms like Ray, we can run containers that have all the prerequisite libraries necessary for these frameworks. Here, we will set up the container framework.
 
 ```bash
 # run on node-mltrain
@@ -117,4 +117,3 @@ and we can install `nvtop` to monitor GPU usage:
 sudo apt update
 sudo apt -y install nvtop
 ```
-

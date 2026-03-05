@@ -2,9 +2,7 @@
 
 # Train ML models with Ray
 
-In this tutorial, we explore some of the infrastructure and platform requirements for large model training, and to support the training of many models by many teams. We focus specifically on 
-
-* scheduling training jobs on a GPU cluster (using [Ray](https://www.ray.io/))
+In this tutorial, we explore some of the infrastructure and platform requirements for large model training, and to support the training of many models by many teams. We focus specifically on scheduling training jobs on a GPU cluster (using [Ray](https://www.ray.io/)).
 
 To run this experiment, you should have already created an account on Chameleon, and become part of a project. You must also have added your SSH key to the CHI@TACC site.
 
@@ -504,7 +502,7 @@ trainer = ray.train.lightning.prepare_trainer(trainer)
 
 ```
 
-* at the end, we run the training function with
+At the end, we run the training function with
 
 ```python
 run_config = RunConfig(storage_path="s3://ray")
@@ -649,7 +647,7 @@ To add fault tolerance, we
 run_config = RunConfig( ... failure_config=FailureConfig(max_failures=2))
 ```
 
-* and inside `train_fun`, we replace the old
+And inside `train_fun`, we replace the old
 
 ```python
 trainer.fit(lightning_food11_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
@@ -819,7 +817,6 @@ and then stop the Jupyter server with
 # run on node-mltrain
 docker stop jupyter
 ```
-
 
 
 

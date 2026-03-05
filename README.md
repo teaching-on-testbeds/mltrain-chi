@@ -1,6 +1,4 @@
-In this tutorial, we explore some of the infrastructure and platform requirements for large model training, and to support the training of many models by many teams. We focus specifically on 
-
-* scheduling training jobs on a GPU cluster (using [Ray](https://www.ray.io/))
+In this tutorial, we explore some of the infrastructure and platform requirements for large model training, and to support the training of many models by many teams. We focus specifically on scheduling training jobs on a GPU cluster (using [Ray](https://www.ray.io/)).
 
 Follow along at [Train ML models with Ray](https://teaching-on-testbeds.github.io/mltrain-chi/).
 
