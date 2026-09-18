@@ -2,7 +2,7 @@ name: ray_cluster
 services:
   # MinIO object store service provides storage for checkpoints from Ray Train jobs
   minio:
-    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: minio
     restart: always
     expose:
@@ -24,7 +24,7 @@ services:
   # When the minio service has started, launch a container with the minio client
   # and use it to create a bucket named ray
   minio-create-bucket:
-    image: minio/mc:RELEASE.2025-08-13T08-35-41Z-cpuv1
+    image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z-cpuv1
     depends_on:
       minio:
         condition: service_healthy
